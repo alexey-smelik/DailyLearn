@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# uv
+.venv/
+.uv/
+
+# Env
+.env
+.env.*
+
+# OS
+.DS_Store
+
+# claude
+CLAUDE.md
+.claude/
+
+# serena
+.serena/
+
+# pytest
+.pytest_cache/
+
+# ruff
+.ruff_cache/
+
+# mypy

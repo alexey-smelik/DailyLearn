@@ -1,0 +1,10 @@
+from pydantic_settings import BaseSettings
+
+
+class Settings(BaseSettings):
+    tg_tool_url: str = "http://localhost:8001"
+
+    model_config = {"env_file": ".env", "extra": "ignore"}
+
+
+settings = Settings()

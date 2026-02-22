@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dailylearn
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    build:
+      context: ./web-api
+    command: ["uv", "run", "alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dailylearn
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  web-api:
+    build:
+      context: ./web-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dailylearn
+      TG_TOOL_URL: http://tg-tool:8001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  tg-tool:
+    build:
+      context: ./tg-tool
+    ports:
+      - "8001:8001"
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      WEB_API_URL: http://web-api:8000
+      PORT: "8001"
+    depends_on:
+      - web-api
+    restart: unless-stopped
+
+  core:
+    build:
+      context: ./core
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dailylearn
+      TG_TOOL_URL: http://tg-tool:8001
+      CHECK_INTERVAL_MINUTES: "60"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  web-ui:
+    build:
+      context: ./web-ui
+    ports:
+      - "80:80"
+    depends_on:
+      - web-api
+
+volumes:
+  postgres_data:
