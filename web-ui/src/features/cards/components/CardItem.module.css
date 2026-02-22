@@ -1,0 +1,150 @@
+.card {
+  outline: none;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  font-family: inherit;
+  min-height: 130px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+}
+
+.card:hover {
+  border-color: #a5b4fc;
+  box-shadow:
+    0 0 0 1px #c7d2fe,
+    0 12px 32px -8px rgba(99,102,241,0.18),
+    0 4px 8px rgba(99,102,241,0.08);
+  transform: translateY(-3px);
+}
+
+.card:active {
+  transform: translateY(-1px);
+}
+
+.inactive {
+  opacity: 0.55;
+}
+
+.accentBarInactive {
+  background: var(--border) !important;
+}
+
+.accentBar {
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, #8b5cf6 60%, #a78bfa 100%);
+  flex-shrink: 0;
+}
+
+.body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.name {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+.link {
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  background: var(--accent-light);
+  padding: 3px 9px;
+  border-radius: 20px;
+  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.link:hover {
+  background: #ddd6fe;
+}
+
+.schedule {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  background: var(--border-soft);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 9px;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  letter-spacing: 0.02em;
+}
+
+.editHint {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-size: 0.7rem;
+  color: #c7d2fe;
+  opacity: 0;
+  transition: opacity 0.15s;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.card:hover .editHint {
+  opacity: 1;
+}
+
+.toggleBtn {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s, background 0.15s;
+  margin-left: auto;
+}
+
+.toggleBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggleBtnActive {
+  color: #16a34a;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.toggleBtnActive:hover:not(:disabled) {
+  background: #dcfce7;
+}
+
+.toggleBtnPaused {
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: var(--border-soft);
+}
+
+.toggleBtnPaused:hover:not(:disabled) {
+  background: var(--border);
+}
