@@ -7,7 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from app.config import settings
-from app.scheduler.jobs import dispatch_due_cards
+from app.scheduler.jobs import dispatch_conspect_requests, dispatch_due_cards
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +22,13 @@ async def main() -> None:
         dispatch_due_cards,
         trigger=IntervalTrigger(minutes=settings.check_interval_minutes),
         id="dispatch_due_cards",
+        replace_existing=True,
+        max_instances=1,
+    )
+    scheduler.add_job(
+        dispatch_conspect_requests,
+        trigger=IntervalTrigger(minutes=settings.check_interval_minutes),
+        id="dispatch_conspect_requests",
         replace_existing=True,
         max_instances=1,
     )

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { User } from '../../auth/types'
-import { useGroups } from '../../groups/hooks/useGroups'
+import type { Group } from '../../groups/types'
 import { useCards } from '../hooks/useCards'
 import type { LearningCard } from '../types'
 import { CardForm } from './CardForm'
@@ -9,56 +9,24 @@ import styles from './CardGrid.module.css'
 
 interface CardGridProps {
   user: User
-  onLogout: () => void
+  groups: Group[]
+  selectedGroup: number | 'all'
 }
 
-export function CardGrid({ user, onLogout }: CardGridProps) {
+export function CardGrid({ user, groups, selectedGroup }: CardGridProps) {
   const { query, create, update, toggle, remove } = useCards(user.id)
-  const groupsHook = useGroups(user.id)
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<LearningCard | null>(null)
-  const [selectedGroup, setSelectedGroup] = useState<number | 'all'>('all')
-  const [addingGroup, setAddingGroup] = useState(false)
-  const [newGroupName, setNewGroupName] = useState('')
 
   const allCards = query.data ?? []
-  const groups = groupsHook.query.data ?? []
-  const initial = user.login.charAt(0).toUpperCase()
 
   const visibleCards =
     selectedGroup === 'all'
       ? allCards
       : allCards.filter(c => c.group_id === selectedGroup)
 
-  async function handleAddGroup() {
-    const name = newGroupName.trim()
-    if (!name) return
-    await groupsHook.create.mutateAsync({ name, user_id: user.id })
-    setNewGroupName('')
-    setAddingGroup(false)
-  }
-
-  async function handleDeleteGroup(id: number) {
-    await groupsHook.remove.mutateAsync(id)
-    if (selectedGroup === id) setSelectedGroup('all')
-  }
-
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.brand}>
-          <div className={styles.logoWrap}>🎓</div>
-          <span className={styles.appName}>DailyLearn</span>
-        </div>
-        <div className={styles.userRow}>
-          <div className={styles.avatar}>{initial}</div>
-          <span className={styles.userLogin}>{user.login}</span>
-          <button className={styles.logoutBtn} onClick={onLogout}>
-            Log out
-          </button>
-        </div>
-      </header>
-
       <main className={styles.main}>
         <div className={styles.toolbar}>
           <div className={styles.headingGroup}>
@@ -70,54 +38,6 @@ export function CardGrid({ user, onLogout }: CardGridProps) {
           <button className={styles.addBtn} onClick={() => setCreating(true)}>
             + Add Card
           </button>
-        </div>
-
-        {/* Group filter bar */}
-        <div className={styles.filterBar}>
-          <button
-            className={`${styles.filterChip} ${selectedGroup === 'all' ? styles.filterChipActive : ''}`}
-            onClick={() => setSelectedGroup('all')}
-          >
-            All
-          </button>
-          {groups.map(g => (
-            <div key={g.id} className={styles.filterChipWrap}>
-              <button
-                className={`${styles.filterChip} ${selectedGroup === g.id ? styles.filterChipActive : ''}`}
-                onClick={() => setSelectedGroup(g.id)}
-              >
-                {g.name}
-              </button>
-              <button
-                className={styles.removeGroupBtn}
-                onClick={() => handleDeleteGroup(g.id)}
-                title={`Delete group "${g.name}"`}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-          {addingGroup ? (
-            <div className={styles.addGroupInline}>
-              <input
-                className={styles.addGroupInput}
-                value={newGroupName}
-                onChange={e => setNewGroupName(e.target.value)}
-                placeholder="Group name"
-                autoFocus
-                onKeyDown={e => {
-                  if (e.key === 'Enter') handleAddGroup()
-                  if (e.key === 'Escape') { setAddingGroup(false); setNewGroupName('') }
-                }}
-              />
-              <button className={styles.addGroupConfirm} onClick={handleAddGroup}>Add</button>
-              <button className={styles.addGroupCancel} onClick={() => { setAddingGroup(false); setNewGroupName('') }}>×</button>
-            </div>
-          ) : (
-            <button className={styles.newGroupBtn} onClick={() => setAddingGroup(true)}>
-              + Group
-            </button>
-          )}
         </div>
 
         {query.isLoading && <p className={styles.state}>Loading…</p>}
@@ -135,7 +55,7 @@ export function CardGrid({ user, onLogout }: CardGridProps) {
         )}
 
         {!query.isLoading && !query.isError && allCards.length > 0 && visibleCards.length === 0 && (
-          <p className={styles.state}>No cards in this group.</p>
+          <p className={styles.state}>No cards in this topic.</p>
         )}
 
         {visibleCards.length > 0 && (
@@ -147,6 +67,21 @@ export function CardGrid({ user, onLogout }: CardGridProps) {
                 onClick={() => setEditing(card)}
                 onToggle={() => toggle.mutateAsync(card.id)}
                 toggling={toggle.isPending}
+                onDelete={() => remove.mutateAsync(card.id) as Promise<void>}
+                onDuplicate={name => create.mutateAsync({
+                  name,
+                  source_url: card.source_url ?? undefined,
+                  schedule: card.schedule ?? undefined,
+                  tg_chat_id: card.tg_chat_id ?? undefined,
+                  tg_topic_id: card.tg_topic_id ?? undefined,
+                  message_template: card.message_template ?? undefined,
+                  group_id: card.group_id,
+                  show_pause_button: card.show_pause_button,
+                  show_skip_button: card.show_skip_button,
+                  show_quiz_button: card.show_quiz_button,
+                  time_to_educate: card.time_to_educate ?? undefined,
+                  user_id: user.id,
+                })}
               />
             ))}
           </div>

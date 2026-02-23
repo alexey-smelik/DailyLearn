@@ -54,6 +54,10 @@ class LearningCardCreate(BaseModel):
     message_template: str | None = None
     group_id: int | None = None
     is_active: bool = True
+    show_pause_button: bool = True
+    show_skip_button: bool = True
+    show_quiz_button: bool = False
+    time_to_educate: str | None = None
     user_id: int
 
 
@@ -66,6 +70,11 @@ class LearningCardUpdate(BaseModel):
     message_template: str | None = None
     group_id: int | None = None
     is_active: bool | None = None
+    show_pause_button: bool | None = None
+    show_skip_button: bool | None = None
+    show_quiz_button: bool | None = None
+    time_to_educate: str | None = None
+    conspect: str | None = None
 
 
 class LearningCardResponse(BaseModel):
@@ -80,8 +89,18 @@ class LearningCardResponse(BaseModel):
     message_template: str | None
     group_id: int | None
     is_active: bool
+    show_pause_button: bool
+    show_skip_button: bool
+    show_quiz_button: bool
+    time_to_educate: str | None
+    conspect: str | None
+    conspect_requested: bool
     add_date: datetime
     user_id: int
+
+
+class SaveConspectBody(BaseModel):
+    conspect: str
 
 
 # ── Newsletter ────────────────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -6,9 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_session
+from app.models.newsletter import Newsletter
 from app.repositories.learning_card import LearningCardRepository
 from app.services.exceptions import LearningCardNotFound
-from app.services.schemas import LearningCardCreate, LearningCardResponse, LearningCardUpdate
+from app.services.schemas import LearningCardCreate, LearningCardResponse, LearningCardUpdate, SaveConspectBody
 
 router = APIRouter(prefix="/learning-cards", tags=["learning-cards"])
 
@@ -67,6 +69,26 @@ async def toggle_learning_card(
     return await repo.toggle(card)  # type: ignore[return-value]
 
 
+@router.post("/{card_id}/skip", status_code=status.HTTP_200_OK)
+async def skip_learning_card(
+    card_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, bool]:
+    """Record a newsletter entry without sending — advances the review interval."""
+    repo = LearningCardRepository(session)
+    card = await repo.get_by_id(card_id)
+    if card is None:
+        raise LearningCardNotFound(card_id)
+    newsletter = Newsletter(
+        user_id=card.user_id,
+        learning_card_id=card.id,
+        send_date=datetime.now(tz=timezone.utc),
+    )
+    session.add(newsletter)
+    await session.flush()
+    return {"ok": True}
+
+
 @router.post("/{card_id}/test-send", status_code=status.HTTP_200_OK)
 async def test_send_learning_card(
     card_id: uuid.UUID,
@@ -89,6 +111,10 @@ async def test_send_learning_card(
         "source_url": card.source_url,
         "schedule": card.schedule,
         "message_template": card.message_template,
+        "show_pause_button": card.show_pause_button,
+        "show_skip_button": card.show_skip_button,
+        "show_quiz_button": card.show_quiz_button,
+        "has_conspect": bool(card.conspect and card.conspect.strip()),
     }
     async with httpx.AsyncClient() as client:
         resp = await client.post(f"{settings.tg_tool_url}/send", json=payload, timeout=10)
@@ -98,6 +124,20 @@ async def test_send_learning_card(
             detail=f"tg-tool error: {resp.text}",
         )
     return {"ok": True}
+
+
+@router.post("/{card_id}/save-conspect", response_model=LearningCardResponse)
+async def save_conspect(
+    card_id: uuid.UUID,
+    body: SaveConspectBody,
+    session: AsyncSession = Depends(get_session),
+) -> LearningCardResponse:
+    """Save user's study notes (conspect) for a card."""
+    repo = LearningCardRepository(session)
+    card = await repo.get_by_id(card_id)
+    if card is None:
+        raise LearningCardNotFound(card_id)
+    return await repo.update(card, LearningCardUpdate(conspect=body.conspect))  # type: ignore[return-value]
 
 
 @router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)

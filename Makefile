@@ -1,8 +1,9 @@
 .PHONY: up down build restart logs ps \
         migrate migrate-create migrate-down \
-        lint lint-api lint-core lint-tg \
-        test test-api test-core test-tg \
-        ui-install ui-dev ui-build
+        lint lint-api lint-core lint-tg lint-quiz \
+        test test-api test-core test-tg test-quiz \
+        ui-install ui-dev ui-build \
+        ollama-pull-llama3 ollama-pull-phi3 ollama-list
 
 # ── Docker Compose ─────────────────────────────────────────────────────────
 
@@ -46,7 +47,7 @@ migrate-down:
 
 # ── Lint (all services) ────────────────────────────────────────────────────
 
-lint: lint-api lint-core lint-tg
+lint: lint-api lint-core lint-tg lint-quiz
 
 lint-api:
 	$(MAKE) -C web-api lint
@@ -57,9 +58,12 @@ lint-core:
 lint-tg:
 	$(MAKE) -C tg-tool lint
 
+lint-quiz:
+	$(MAKE) -C quiz-service lint
+
 # ── Tests (all services) ───────────────────────────────────────────────────
 
-test: test-api test-core test-tg
+test: test-api test-core test-tg test-quiz
 
 test-api:
 	$(MAKE) -C web-api test
@@ -69,6 +73,9 @@ test-core:
 
 test-tg:
 	$(MAKE) -C tg-tool test
+
+test-quiz:
+	$(MAKE) -C quiz-service test
 
 # ── Frontend ───────────────────────────────────────────────────────────────
 
@@ -80,3 +87,14 @@ ui-dev:
 
 ui-build:
 	npm --prefix web-ui run build
+
+# ── Ollama model management ───────────────────────────────────────────────
+
+ollama-pull-llama3:
+	docker compose exec ollama ollama pull llama3
+
+ollama-pull-phi3:
+	docker compose exec ollama ollama pull phi3:mini
+
+ollama-list:
+	docker compose exec ollama ollama list

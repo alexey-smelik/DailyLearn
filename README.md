@@ -44,9 +44,15 @@ next_review = last_review + interval_days * difficulty_factor
 - [ ] Prepare smart-plan learning with auto pushes
 - [ ] Smart feedback aggregation
 - [ ] Local demon supporting
+- [ ] Functional tests
 - [ ] Obsidian integration for local demon
 - [ ] Telegram support editing cards / feedback
 - [ ] Update test-coverage
+- [ ] Quiz for telegram by theme off video
+- [ ] Calendar integration
+- [ ] Dashboard for making desicion for future-education with risks
+- [ ] Knownledgebase for conspects, summarizing
+- [ ] Docs pages with Quick Start
 - [ ] CSV / JSON import & export
 - [ ] Tags — free-form labels in addition to groups
 - [ ] PWA support — offline access and browser push notifications

@@ -5,6 +5,7 @@ import logging
 
 import uvicorn
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
 from fastapi import FastAPI
 
 from app.api.router import router as api_router
@@ -26,7 +27,7 @@ def create_app(bot: Bot) -> FastAPI:
 
 async def main() -> None:
     bot = Bot(token=settings.bot_token)
-    dp = Dispatcher()
+    dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(bot_router)
 
     app = create_app(bot)

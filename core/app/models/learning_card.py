@@ -27,7 +27,16 @@ class LearningCard(Base):
         nullable=False,
         server_default=func.now(),
     )
+    group_id: Mapped[int | None] = mapped_column(
+        sa.ForeignKey("card_groups.id", ondelete="SET NULL"), nullable=True
+    )
     is_active: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.true())
+    show_pause_button: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.true())
+    show_skip_button: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.true())
+    show_quiz_button: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.false())
+    time_to_educate: Mapped[str | None] = mapped_column(sa.Text, nullable=True)
+    conspect: Mapped[str | None] = mapped_column(sa.Text, nullable=True)
+    conspect_requested: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, server_default=sa.false())
     user_id: Mapped[int] = mapped_column(sa.ForeignKey("users.id"), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="learning_cards")  # noqa: F821
