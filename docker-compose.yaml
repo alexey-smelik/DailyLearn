@@ -48,6 +48,8 @@ services:
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
       WEB_API_URL: http://web-api:8000
+      QUIZ_SERVICE_URL: http://quiz-service:8002
+      QUIZ_MODEL: phi3:mini
       PORT: "8001"
     depends_on:
       - web-api
@@ -59,7 +61,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dailylearn
       TG_TOOL_URL: http://tg-tool:8001
-      CHECK_INTERVAL_MINUTES: "60"
+      CHECK_INTERVAL_MINUTES: "1"
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,5 +77,41 @@ services:
     depends_on:
       - web-api
 
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  quiz-service:
+    build:
+      context: ./quiz-service
+    ports:
+      - "8002:8002"
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_DEFAULT_MODEL: phi3:mini
+      OLLAMA_TIMEOUT: "120"
+      OLLAMA_MAX_RETRIES: "3"
+      WEB_API_URL: http://web-api:8000
+      MAX_CHUNK_SIZE: "3000"
+      CHUNK_OVERLAP: "200"
+      LOG_LEVEL: INFO
+    depends_on:
+      web-api:
+        condition: service_started
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  ollama_data:

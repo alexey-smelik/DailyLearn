@@ -43,6 +43,101 @@
   flex-shrink: 0;
 }
 
+/* ── Delete error banner ────────────────────────────────────────── */
+
+.deleteError {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 5px;
+  z-index: 3;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Top-right action row ───────────────────────────────────────── */
+
+.topActions {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.card:hover .topActions {
+  opacity: 1;
+}
+
+.deleteBtn {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.deleteBtn:hover {
+  border-color: #fca5a5;
+  color: #ef4444;
+  background: #fff1f2;
+}
+
+.copyBtn {
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.copyBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.editHint {
+  font-size: 0.7rem;
+  color: #c7d2fe;
+  font-weight: 500;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Body ────────────────────────────────────────────────────────── */
+
 .body {
   padding: 18px 20px 20px;
   display: flex;
@@ -96,22 +191,6 @@
   letter-spacing: 0.02em;
 }
 
-.editHint {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  font-size: 0.7rem;
-  color: #c7d2fe;
-  opacity: 0;
-  transition: opacity 0.15s;
-  font-weight: 500;
-  pointer-events: none;
-}
-
-.card:hover .editHint {
-  opacity: 1;
-}
-
 .toggleBtn {
   font-size: 0.7rem;
   font-weight: 600;
@@ -148,3 +227,4 @@
 .toggleBtnPaused:hover:not(:disabled) {
   background: var(--border);
 }
+

@@ -14,7 +14,7 @@ class Newsletter(Base):
     user_id: Mapped[int] = mapped_column(sa.ForeignKey("users.id"), nullable=False)
     learning_card_id: Mapped[uuid.UUID] = mapped_column(
         sa.UUID(as_uuid=True),
-        sa.ForeignKey("learning_cards.id"),
+        sa.ForeignKey("learning_cards.id", ondelete="CASCADE"),
         nullable=False,
     )
     send_date: Mapped[datetime] = mapped_column(sa.DateTime(timezone=True), nullable=False)
